@@ -6,9 +6,16 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+var (
+	MysqlDb *sql.DB
 )
 
 func main() {
+	InitDatabase();
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/addmedicine", AddMedicine)
 	router.HandleFunc("/querymedicine", Querymedicine)
@@ -20,21 +27,6 @@ func AddMedicine(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(fmt.Sprintf("host: %s ID：%s name: %s", req.Host, req.FormValue("id"), req.FormValue("name"))))
 }
 
-// Id                      string `json:"id"`
-// 	Name                    string `json:"name"`
-// 	Alias                   string `json:"alias"`
-// 	Where                   string `json:"where"`
-// 	Efficacy                string `json:"efficacy"`                //功效
-// 	PlantMorphology         string `json:"plantMorphology"`         // 植物形态
-// 	OriginDistribution      string `json:"originDistribution"`      // 产地分布
-// 	HarvestingAndProcessing string `json:"harvestingAndProcessing"` // 采收加工
-// 	MedicinalProperties     string `json:"medicinalProperties"`     // 药物性状
-// 	Taste                   string `json:"taste"`                   // 性味归经
-// 	Function                string `json:"function"`                // 功效与作用
-// 	Application             string `json:"application"`             // 临床应用
-// 	Basis                   string `json:"basis"`                   // 主要成分
-// 	Taboo                   string `json:"taboo"`                   // 使用禁忌
-// 	Processing              string `json:"processing"`              // 加工方法
 
 func Querymedicine(w http.ResponseWriter, req *http.Request) {
 	m := &Medicine{Id: "123123123",
@@ -64,4 +56,31 @@ func Querymedicine(w http.ResponseWriter, req *http.Request) {
 
 func Index(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte("中药字典查询接口"))
+}
+
+func InitDatabase() {
+	db, err := sql.Open("mysql", "root:123456@/db_cms")
+	MysqlDb = db
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("连接mysql数据库成功！")
+		stmt, err := MysqlDb.Prepare("INSERT INTO `tb_medication`(`id`, `tb_name`, `tb_alias`, `tb_where`, `tb_efficacy`, `tb_plantMorphology`, `tb_originDistribution`) VALUES(?, ?, ?, ?, ?, ?, ?)")
+		if err != nil {
+			log.Fatal("准备stmt失败", err)
+		}
+		defer stmt.Close()
+		_, err = stmt.Exec("123123123", 
+		"黄芪", 
+		"黄耆、木耆、绵黄芪", 
+		"豆科植物蒙古黄芪Astragalus membranaceus Bge. var.mongholicus(Bge.) Hsiao和膜荚黄芪A.membranaceus (Fisch.) Bge.的根。", 
+		"补气固表、利尿、托毒排脓、生肌。属补虚药下属分类的补气药。", "野生黄芪春秋两季均可采挖，除净泥土及须根，切去根头，晒至七八成干，按粗细、长短不同分级。栽培黄芪应3年以后采收",
+		"蒙古黄芪生于向阳草地及山坡;膜荚黄芪生于林缘、灌丛、林间草地及疏林下。分布于黑龙江、吉林、辽宁、河北、内蒙古等地。")
+		if err != nil {
+			log.Println("插入数据失败", err)
+		} else {
+			log.Println("出入数据成功")
+		}
+	}
+	
 }
