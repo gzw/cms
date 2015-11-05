@@ -23,4 +23,5 @@ type Medicine struct {
 	Taboo                   string `json:"taboo,omitempty"`                   // 使用禁忌
 	Processing              string `json:"processing,omitempty"`              // 加工方法
 	Other 					string `json:"other,omitempty"`				  // 其他
+	ImageUrl				string `json:"imageUrl,omitempty"`				// 图像地址
 }

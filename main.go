@@ -20,6 +20,7 @@ func main() {
 	router.HandleFunc("/addmedicine", AddMedicine)
 	router.HandleFunc("/querymedicine", Querymedicine)
 	router.HandleFunc("/", Index)
+	router.HandleFunc("/login", Login)
 	log.Fatal(http.ListenAndServe(":8002", router))
 }
 
@@ -35,7 +36,6 @@ func Querymedicine(w http.ResponseWriter, req *http.Request) {
 		Where:                   "豆科植物蒙古黄芪Astragalus membranaceus Bge. var.mongholicus(Bge.) Hsiao和膜荚黄芪A.membranaceus (Fisch.) Bge.的根。",
 		OriginDistribution:      "蒙古黄芪生于向阳草地及山坡;膜荚黄芪生于林缘、灌丛、林间草地及疏林下。分布于黑龙江、吉林、辽宁、河北、内蒙古等地。",
 		HarvestingAndProcessing: "野生黄芪春秋两季均可采挖，除净泥土及须根，切去根头，晒至七八成干，按粗细、长短不同分级。栽培黄芪应3年以后采收",
-
 		PlantMorphology:     "蒙古黄芪：多年生草本。主根长而粗壮，条较顺直。奇数羽状复叶，小叶12~18对，小叶片下面被柔毛。总状花序腋生，花冠黄色至淡黄色，雄蕊10枚，二体。荚果膨胀，无毛。膜荚黄芪：小叶6~13对，荚果有毛。",
 		MedicinalProperties: "蒙古黄芪：表面灰黄色，栓皮不易脱落。质硬而韧，断面纤维性并显粉性。皮部黄白色，木部淡黄色。气微，味微甜，有豆腥味。膜荚黄芪：表面灰黄色、黄棕色，质硬，较难折断。",
 		Taste:               "性微温，味甘。归脾经、肺经。",
@@ -58,6 +58,10 @@ func Index(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte("中药字典查询接口"))
 }
 
+func Login(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("登录接口")
+}
+
 func InitDatabase() {
 	db, err := sql.Open("mysql", "root:123456@/db_cms")
 	MysqlDb = db
@@ -75,11 +79,11 @@ func InitDatabase() {
 		"黄耆、木耆、绵黄芪", 
 		"豆科植物蒙古黄芪Astragalus membranaceus Bge. var.mongholicus(Bge.) Hsiao和膜荚黄芪A.membranaceus (Fisch.) Bge.的根。", 
 		"补气固表、利尿、托毒排脓、生肌。属补虚药下属分类的补气药。", "野生黄芪春秋两季均可采挖，除净泥土及须根，切去根头，晒至七八成干，按粗细、长短不同分级。栽培黄芪应3年以后采收",
-		"蒙古黄芪生于向阳草地及山坡;膜荚黄芪生于林缘、灌丛、林间草地及疏林下。分布于黑龙江、吉林、辽宁、河北、内蒙古等地。")
+		"蒙古黄芪生于向阳草地及山坡，膜荚黄芪生于林缘、灌丛、林间草地及疏林下。分布于黑龙江、吉林、辽宁、河北、内蒙古等地。")
 		if err != nil {
 			log.Println("插入数据失败", err)
 		} else {
-			log.Println("出入数据成功")
+			log.Println("插入数据成功")
 		}
 	}
 	
