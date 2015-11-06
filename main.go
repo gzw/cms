@@ -1,13 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 )
 
 func main() {
-	InitDatabase();
+	InitDatabase()
 	defer MysqlDb.Close()
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/addmedicine", AddMedicine)
@@ -28,9 +28,9 @@ func main() {
 func AddMedicine(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
 		w.Write(CmsErrorToJsonData(CMS_MEDICINE_REQUEST_METHOD_ERROR, "添加中药需要POST方法！"))
-		return;
+		return
 	}
-	
+
 	decoder := json.NewDecoder(req.Body)
 	var m Medicine
 	err := decoder.Decode(&m)
@@ -38,22 +38,21 @@ func AddMedicine(w http.ResponseWriter, req *http.Request) {
 		w.Write(CmsErrorToJsonData(CMS_MEDICINE_ADD_BODY_PARSE_ERROR, err.Error()))
 		return
 	}
-	
+
 	if len(m.Id) == 0 || len(m.Name) == 0 {
 		cmserr := NewCmsError(CMS_MEDICINE_PARAM_ERROR, "中药id或者名称为空")
 		w.Write([]byte(cmserr.CmsErrorToJsonStr()))
-		return;
+		return
 	}
-	
+
 	err = InsertMedicine(&m)
 	if err != nil {
 		w.Write(CmsErrorToJsonData(CMS_MEDICINE_ADD_INSERT_DB_ERROR, err.Error()))
 		return
 	}
-	
+
 	w.Write(CmsErrorNoErrToJsonData("插入成功！"))
 }
-
 
 func Querymedicine(w http.ResponseWriter, req *http.Request) {
 	name := req.FormValue("name")
@@ -68,14 +67,14 @@ func Querymedicine(w http.ResponseWriter, req *http.Request) {
 	log.Println(name)
 	ms, err := QuerymedicineByName(name)
 	if err != nil {
-		e := &CmsError {
+		e := &CmsError{
 			ErrCode: CMS_MEDICINE_QUERY_ERROR,
 			ErrDesc: err.Error(),
 		}
 		w.Write([]byte(e.Error()))
 		return
 	}
-	
+
 	data, _ := json.Marshal(ms)
 	str := string(data)
 	log.Println(str)
@@ -94,8 +93,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 func InitDatabase() {
 	var err error
 	MysqlDb, err = sql.Open("mysql", "root:123456@/db_cms")
-	
-	
+
 	if err != nil {
 		log.Fatal(err)
 	} else {
@@ -120,9 +118,9 @@ func QuerymedicineByName(name string) ([]*Medicine, error) {
 			log.Println(cols)
 		}
 		err = rows.Scan(&m.Id, &m.Name, &m.Alias, &m.Where, &m.Efficacy,
-		 &m.PlantMorphology, &m.OriginDistribution, &m.HarvestingAndProcessing,
-		 &m.MedicinalProperties,
-		 &m.Taste, &m.Application, &m.Basis, &m.Taboo, &m.Processing, &m.Other, &m.ImageUrl)
+			&m.PlantMorphology, &m.OriginDistribution, &m.HarvestingAndProcessing,
+			&m.MedicinalProperties,
+			&m.Taste, &m.Application, &m.Basis, &m.Taboo, &m.Processing, &m.Other, &m.ImageUrl)
 		log.Println(m)
 		ms = append(ms, m)
 	}
@@ -130,40 +128,40 @@ func QuerymedicineByName(name string) ([]*Medicine, error) {
 }
 
 func InsertMedicine(m *Medicine) error {
-	_, err := MysqlDb.Exec("INSERT INTO `tb_medication`(`id`, " +
-											"`tb_name`, " +
-											"`tb_alias`, " +
-											"`tb_where`, " +
-											"`tb_efficacy`, " +
-											"`tb_plantMorphology`, " +
-											"`tb_originDistribution`, " +
-											"`tb_harvestingAndProcessing`, " +
-											"`tb_medicinalProperties`, " +
-											"`tb_taste`, " +
-											"`tb_application`, " +
-											"`tb_basis`, " +
-											"`tb_taboo`, " +
-											"`tb_processing`,"  +
-											"`tb_other`, " +
-											"`tb_imageurl`) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-											m.Id,
-											m.Name,
-											m.Alias,
-											m.Where,
-											m.Efficacy,
-											m.PlantMorphology,
-											m.OriginDistribution,
-											m.HarvestingAndProcessing,
-											m.MedicinalProperties,
-											m.Taste,
-											m.Application,
-											m.Basis,
-											m.Taboo,
-											m.Processing,
-											m.Other,
-											m.ImageUrl)
+	_, err := MysqlDb.Exec("INSERT INTO `tb_medication`(`id`, "+
+		"`tb_name`, "+
+		"`tb_alias`, "+
+		"`tb_where`, "+
+		"`tb_efficacy`, "+
+		"`tb_plantMorphology`, "+
+		"`tb_originDistribution`, "+
+		"`tb_harvestingAndProcessing`, "+
+		"`tb_medicinalProperties`, "+
+		"`tb_taste`, "+
+		"`tb_application`, "+
+		"`tb_basis`, "+
+		"`tb_taboo`, "+
+		"`tb_processing`,"+
+		"`tb_other`, "+
+		"`tb_imageurl`) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		m.Id,
+		m.Name,
+		m.Alias,
+		m.Where,
+		m.Efficacy,
+		m.PlantMorphology,
+		m.OriginDistribution,
+		m.HarvestingAndProcessing,
+		m.MedicinalProperties,
+		m.Taste,
+		m.Application,
+		m.Basis,
+		m.Taboo,
+		m.Processing,
+		m.Other,
+		m.ImageUrl)
 	if err != nil {
 		return err
-	}						
+	}
 	return nil
 }
